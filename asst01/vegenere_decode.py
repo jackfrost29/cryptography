@@ -7,6 +7,7 @@ data on the internet for case sensitive cypher.
 from functools import reduce
 import operator
 import collections
+import math
 
 def factors(n):    
     return set(reduce(list.__add__, 
@@ -58,7 +59,7 @@ for i in range(3, cypher_length):
     if key_length_guess[i] >= key_length_guess[max]:
         max = i
 
-guess = max
+guess_key_length = max
 
 char_freq = {}
 
@@ -67,25 +68,42 @@ with open('char_freq.txt', 'r') as f:
     char_list = f.readline().replace('\'', '').split(',')
     freq_list = [float(i) for i in temp]
     temp_dic = dict(zip(char_list, freq_list))
-    char_freq = {k: v for k, v in sorted(temp_dic.items(), key=lambda item: item[1])}
-
-sample_freq = {}
-for i in range(0, 26):
-    sample_freq[chr(i+ord('a'))] = 0
-
-for i in range(0, len(cypher)):
-    sample_freq[cypher[i]] += 1
-
-for item in sample_freq.keys():
-    sample_freq[item] = sample_freq[item] / cypher_length
+    char_freq = {k: v for k, v in sorted(temp_dic.items(), key=lambda item: item[1], reverse=True)}
+    #print(char_freq)
 
 
-sample_freq = {k: v for k, v in sorted(sample_freq.items(), key=lambda item: item[1])}
+sample_freq = []    # relative frequency for every monoalphabatic position
 
-final_map = {}
-for a, b in sample_freq, char_freq:
-    final_map[a] = b
+for i in range(0, guess_key_length):
+    sample_freq.append({})
+    for j in range(0, 26):
+        sample_freq[i] [chr(j+ord('a'))] = 0.0
+
+for i in range(0, len(cypher)): # number of chars at monoalphabatic positions
+    sample_freq[i%guess_key_length] [cypher[i]] += 1
+
+for i in range(0, guess_key_length):
+    for j in range(0, 26):
+        sample_freq[i] [chr(j+ord('a'))] /= (math.floor((cypher_length+guess_key_length-i-1)/guess_key_length))
+
+# Now every monoalpha pos has the relative freq count inside sample_freq
+# Now we have to sort it
+
+for i in range(0, guess_key_length):
+    sample_freq[i] = {k: v for k, v in sorted(sample_freq[i].items(), key=lambda item: item[1], reverse=True)}
+
+sample_freq = {k: v for k, v in sorted(sample_freq[i].items(), key=lambda item: item[1])}
+
+# now we have to map each entry of sample freq with char_set_freq
+
+
+
+final_map = []
+for i in range(0, guess_key_length):
+    final_map.append({})
+    for (k,v), (k2,v2) in zip(sample_freq[i].items(), char_freq.items()):
+        final_map[i][k] = k2
 
 with open('decode_without_key.txt', 'w+') as f:
     for i in range(0, cypher_length):
-        f.write(final_map[cypher[i]])
+        f.write(final_map[i][cypher[i]])
