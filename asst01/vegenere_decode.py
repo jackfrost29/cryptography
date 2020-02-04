@@ -1,9 +1,9 @@
-
 '''
 decryption without key is implemented for case insensitive cypher.
 Because there are no existing character relative frequency statistical
 data on the internet for case sensitive cypher.
 '''
+
 from functools import reduce
 import operator
 import collections
@@ -54,11 +54,12 @@ while key_length < cypher_length:
     
     key_length += 1
 
-max = 2
-for i in range(3, cypher_length):
+max = 3
+#print(dic_div)
+for i in range(4, cypher_length):
     if key_length_guess[i] >= key_length_guess[max]:
         max = i
-
+#print(key_length_guess)
 guess_key_length = max
 
 char_freq = {}
@@ -92,18 +93,15 @@ for i in range(0, guess_key_length):
 for i in range(0, guess_key_length):
     sample_freq[i] = {k: v for k, v in sorted(sample_freq[i].items(), key=lambda item: item[1], reverse=True)}
 
-sample_freq = {k: v for k, v in sorted(sample_freq[i].items(), key=lambda item: item[1])}
 
 # now we have to map each entry of sample freq with char_set_freq
 
-
-
 final_map = []
 for i in range(0, guess_key_length):
-    final_map.append({})
-    for (k,v), (k2,v2) in zip(sample_freq[i].items(), char_freq.items()):
-        final_map[i][k] = k2
+    final_map.append(dict(zip(list(sample_freq[i].keys()), list(char_freq.keys()))))
 
 with open('decode_without_key.txt', 'w+') as f:
     for i in range(0, cypher_length):
-        f.write(final_map[i][cypher[i]])
+        f.write(final_map[i%guess_key_length][cypher[i]])
+
+print(guess_key_length)
