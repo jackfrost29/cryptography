@@ -43,4 +43,4 @@ for m1 in word_list:
         if m1 != m2 and bitwise_xor_match(m1, m2, c1_xor_c2):
             print(m1)
             print(m2)
-            break
+            exit()
